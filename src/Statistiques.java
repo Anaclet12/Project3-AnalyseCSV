@@ -1,9 +1,6 @@
 import java.util.List;
 
-/**
- * Classe qui calcule des statistiques sur une liste de nombres.
- * Utilise des methodes de classe (static).
- */
+// Classe qui calcule les statistiques
 public class Statistiques {
 
     // Methode de classe : calcule la moyenne
