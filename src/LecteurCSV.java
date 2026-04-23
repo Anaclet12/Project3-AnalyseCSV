@@ -4,68 +4,67 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Classe responsable de la lecture d'un fichier CSV.
- * Elle extrait les en-têtes (noms des colonnes) et les données.
- */
+// Classe de lecture du fichier CSV et stockage des donnees
 public class LecteurCSV {
 
+    // Encapsulation : attributs prives
     private String cheminFichier;
     private List<String> entetes;
-    private List<List<String>> donnees;
+    private List<String> etiquettes;          // Premiere colonne (texte)
+    private List<List<Double>> donnees;       // Colonnes numeriques
 
+    // Constructeur
     public LecteurCSV(String cheminFichier) {
         this.cheminFichier = cheminFichier;
         this.entetes = new ArrayList<>();
+        this.etiquettes = new ArrayList<>();
         this.donnees = new ArrayList<>();
     }
 
+    // Methode d'instance : lecture du fichier CSV
     public void lireFichier() throws IOException {
         BufferedReader lecteur = new BufferedReader(new FileReader(cheminFichier));
         String ligne;
         boolean premiereLigne = true;
 
         while ((ligne = lecteur.readLine()) != null) {
-            if (ligne.trim().isEmpty()) {
-                continue;
-            }
+            if (ligne.trim().isEmpty()) continue;
 
             String[] valeurs = ligne.split(",");
-            List<String> ligneListe = new ArrayList<>();
-            for (String valeur : valeurs) {
-                ligneListe.add(valeur.trim());
-            }
 
             if (premiereLigne) {
-                entetes = ligneListe;
+                // Sauvegarder les en-tetes
+                for (String v : valeurs) {
+                    entetes.add(v.trim());
+                }
                 premiereLigne = false;
             } else {
-                donnees.add(ligneListe);
+                // Premiere colonne = etiquette
+                etiquettes.add(valeurs[0].trim());
+
+                // Autres colonnes = nombres
+                for (int i = 1; i < valeurs.length; i++) {
+                    // Creer la colonne si elle n'existe pas encore
+                    if (donnees.size() < i) {
+                        donnees.add(new ArrayList<>());
+                    }
+                    donnees.get(i - 1).add(Double.parseDouble(valeurs[i].trim()));
+                }
             }
         }
         lecteur.close();
     }
 
+    // Methodes d'acces (getters) - encapsulation
     public List<String> getEntetes() {
         return entetes;
     }
 
-    public List<List<String>> getDonnees() {
-        return donnees;
+    public List<String> getEtiquettes() {
+        return etiquettes;
     }
 
-    public List<Double> getColonneNumerique(int indexColonne) {
-        List<Double> colonne = new ArrayList<>();
-        for (List<String> ligne : donnees) {
-            if (indexColonne < ligne.size()) {
-                String valeur = ligne.get(indexColonne);
-                try {
-                    colonne.add(Double.parseDouble(valeur));
-                } catch (NumberFormatException e) {
-                    // Valeur non numérique : on l'ignore
-                }
-            }
-        }
-        return colonne;
+    public List<List<Double>> getDonnees() {
+        return donnees;
     }
 }
